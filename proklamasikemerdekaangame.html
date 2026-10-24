@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Edukasi: Proklamasi Kemerdekaan</title>
+    <style>
+        :root {
+            --purple: #6C5CE7;
+            --cyan: #00D2FF;
+            --pink: #FF6B9D;
+            --yellow: #FFD93D;
+            --green: #6BCB77;
+            --dark: #1e1e2f;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --text-light: #f1f2f6;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Animated Background Blobs */
+        .bg-blobs {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: -1;
+            overflow: hidden;
+        }
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.6;
+            animation: float 10s infinite alternate ease-in-out;
+        }
+        .blob-1 { width: 300px; height: 300px; background: var(--purple); top: 10%; left: 10%; animation-delay: 0s; }
+        .blob-2 { width: 400px; height: 400px; background: var(--cyan); bottom: -10%; right: -5%; animation-delay: -2s; }
+        .blob-3 { width: 250px; height: 250px; background: var(--pink); top: 40%; left: 50%; animation-delay: -4s; }
+        .blob-4 { width: 350px; height: 350px; background: var(--yellow); bottom: 20%; left: -10%; animation-delay: -6s; opacity: 0.4;}
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(30px, -50px) scale(1.1); }
+        }
+
+        /* Glassmorphism Container */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 800px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            position: relative;
+            z-index: 10;
+            display: none; /* Hidden by default */
+        }
+        .glass-panel.active {
+            display: block;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 3D Clay Mascot */
+        .mascot-container {
+            position: absolute;
+            top: -60px;
+            right: 20px;
+            z-index: 20;
+        }
+        .mascot {
+            width: 80px; height: 80px;
+            background: linear-gradient(135deg, var(--pink), #ff4785);
+            border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+            box-shadow: inset -10px -10px 20px rgba(0,0,0,0.2), 
+                        inset 10px 10px 20px rgba(255,255,255,0.4),
+                        5px 15px 25px rgba(0,0,0,0.3);
+            animation: morph 4s ease-in-out infinite, bob 2s ease-in-out infinite;
+            position: relative;
+        }
+        .mascot::before, .mascot::after { /* Eyes */
+            content: ''; position: absolute;
+            width: 10px; height: 14px;
+            background: #2d3436;
+            border-radius: 50%;
+            top: 30px;
+        }
+        .mascot::before { left: 22px; }
+        .mascot::after { right: 22px; }
+        .mascot .blush {
+            position: absolute; width: 12px; height: 8px;
+            background: rgba(255,0,0,0.4); border-radius: 50%; top: 42px; filter: blur(2px);
+        }
+        .mascot .blush.left { left: 14px; }
+        .mascot .blush.right { right: 14px; }
+        .mascot .mouth {
+            position: absolute; width: 16px; height: 8px;
+            border-bottom: 3px solid #2d3436; border-radius: 0 0 10px 10px;
+            top: 45px; left: 32px;
+        }
+
+        @keyframes morph {
+            0%, 100% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
+            34% { border-radius: 70% 30% 50% 50% / 30% 30% 70% 70%; }
+            67% { border-radius: 100% 60% 60% 100% / 100% 100% 60% 60%; }
+        }
+        @keyframes bob {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Typography & Forms */
+        h1, h2, h3 { text-align: center; margin-bottom: 1rem; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        h1 { color: var(--cyan); font-size: 2.5rem; text-transform: uppercase; letter-spacing: 2px;}
+        .form-group { margin-bottom: 1.5rem; }
+        label { display: block; margin-bottom: 0.5rem; font-weight: bold; }
+        input[type="text"] {
+            width: 100%; padding: 12px 15px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.3);
+            background: rgba(0,0,0,0.2);
+            color: white; font-size: 1rem;
+            outline: none; transition: 0.3s;
+        }
+        input[type="text"]:focus {
+            border-color: var(--cyan); box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-block; width: 100%;
+            padding: 12px 20px; border: none; border-radius: 12px;
+            font-size: 1.1rem; font-weight: bold; cursor: pointer;
+            transition: all 0.3s ease; text-align: center;
+            text-transform: uppercase; letter-spacing: 1px;
+            color: white; position: relative; overflow: hidden;
+        }
+        .btn-primary { background: linear-gradient(45deg, var(--purple), var(--cyan)); }
+        .btn-primary:hover { box-shadow: 0 0 20px var(--cyan); transform: translateY(-2px); }
+        .btn-secondary { background: rgba(255,255,255,0.1); border: 1px solid white; }
+        .btn-secondary:hover { background: rgba(255,255,255,0.2); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        /* HUD */
+        .hud {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 1.5rem; padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        .hud-info span { display: block; font-size: 0.9rem; color: #ccc; }
+        .hud-score { font-size: 1.5rem; font-weight: bold; color: var(--yellow); text-shadow: 0 0 10px rgba(255,217,61,0.5); }
+        .progress-bar-container { width: 100%; height: 8px; background: rgba(0,0,0,0.3); border-radius: 4px; margin-bottom: 1.5rem; overflow: hidden; }
+        .progress-bar { height: 100%; background: var(--green); width: 0%; transition: width 0.3s; box-shadow: 0 0 10px var(--green); }
+
+        /* Question Layout */
+        .question-box { font-size: 1.2rem; margin-bottom: 1.5rem; line-height: 1.5; }
+        .options-grid { display: grid; gap: 10px; margin-bottom: 1.5rem; }
+        .option-btn {
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+            padding: 15px; border-radius: 12px; color: white; cursor: pointer;
+            text-align: left; transition: 0.2s; font-size: 1rem; display: flex; align-items: center;
+        }
+        .option-btn:hover:not(:disabled) { background: rgba(255,255,255,0.2); border-color: var(--cyan); }
+        .option-btn.correct { background: rgba(107, 203, 119, 0.4); border-color: var(--green); box-shadow: 0 0 10px var(--green); }
+        .option-btn.wrong { background: rgba(255, 107, 107, 0.4); border-color: #ff6b6b; box-shadow: 0 0 10px #ff6b6b; }
+        .option-btn.selected { border-color: var(--yellow); box-shadow: 0 0 10px var(--yellow); }
+
+        /* Matching Game Layout */
+        .match-container { display: flex; justify-content: space-between; gap: 20px; margin-bottom: 1.5rem; }
+        .match-column { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+        .match-item {
+            background: rgba(255,255,255,0.1); padding: 12px; border-radius: 8px;
+            cursor: pointer; text-align: center; border: 1px solid rgba(255,255,255,0.3);
+            transition: 0.2s; font-size: 0.9rem;
+        }
+        .match-item:hover { background: rgba(255,255,255,0.2); }
+        .match-item.selected { background: var(--purple); border-color: var(--cyan); }
+        .match-item.matched { background: rgba(107, 203, 119, 0.3); border-color: var(--green); cursor: default; opacity: 0.7;}
+        .match-item.error-shake { animation: shake 0.4s; background: rgba(255, 107, 107, 0.4); }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* Feedback Box */
+        .feedback-box {
+            background: rgba(0,0,0,0.5); border-left: 5px solid; padding: 15px;
+            border-radius: 8px; margin-bottom: 1.5rem; display: none;
+            animation: fadeIn 0.3s; font-size: 0.95rem;
+        }
+        .feedback-box.show { display: block; }
+        .feedback-box h4 { margin-bottom: 5px; }
+        .feedback-correct { border-color: var(--green); }
+        .feedback-correct h4 { color: var(--green); }
+        .feedback-wrong { border-color: var(--pink); }
+        .feedback-wrong h4 { color: var(--pink); }
+
+        /* Multi-select */
+        .checkbox-container { display: flex; align-items: center; gap: 10px; padding: 12px; background: rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 8px; cursor: pointer; border: 1px solid transparent; }
+        .checkbox-container:hover { background: rgba(255,255,255,0.1); }
+        .checkbox-container input { width: 20px; height: 20px; cursor: pointer; accent-color: var(--cyan); }
+
+        /* Error Message Box */
+        #errorMsg { color: var(--pink); font-size: 0.9rem; margin-top: -10px; margin-bottom: 15px; display: none; }
+
+        /* Certificate */
+        .certificate { text-align: center; }
+        .cert-title { font-size: 2rem; margin-bottom: 10px; }
+        .cert-grade { font-size: 2.5rem; font-weight: bold; margin: 15px 0; text-transform: uppercase; }
+        .grade-gold { color: var(--yellow); text-shadow: 0 0 15px var(--pink); }
+        .grade-cyan { color: var(--cyan); text-shadow: 0 0 15px var(--cyan); }
+        .grade-yellow { color: var(--yellow); text-shadow: 0 0 15px #e67e22; }
+        .cert-quote { font-style: italic; color: #ccc; margin: 20px 0; font-size: 1.1rem; line-height: 1.5; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 12px;}
+        
+        canvas#confetti { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 100; }
+
+        @media (max-width: 600px) {
+            .glass-panel { padding: 1.5rem; width: 95%; }
+            h1 { font-size: 1.8rem; }
+            .match-container { flex-direction: row; gap: 10px; } /* Keep row but smaller gap */
+            .match-item { padding: 8px; font-size: 0.75rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Background Animation -->
+    <div class="bg-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+        <div class="blob blob-4"></div>
+    </div>
+
+    <!-- Canvas for Confetti -->
+    <canvas id="confetti"></canvas>
+
+    <!-- Screen 1: Login / Identity -->
+    <div class="glass-panel active" id="screen-login">
+        <div class="mascot-container">
+            <div class="mascot">
+                <div class="blush left"></div>
+                <div class="blush right"></div>
+                <div class="mouth"></div>
+            </div>
+        </div>
+        <h1>Jejak Proklamasi</h1>
+        <p style="text-align: center; margin-bottom: 2rem; color: #ccc;">Misi Sejarah Kelas XI. Buktikan pengetahuanmu!</p>
+        
+        <div class="form-group">
+            <label for="playerName">Nama Lengkap</label>
+            <input type="text" id="playerName" placeholder="Masukkan nama kamu..." autocomplete="off">
+        </div>
+        <div class="form-group">
+            <label for="playerClass">Kelas</label>
+            <input type="text" id="playerClass" placeholder="Contoh: 1 atau 2" autocomplete="off">
+        </div>
+        <div id="errorMsg">Harap isi Nama dan Kelas terlebih dahulu!</div>
+        
+        <button class="btn btn-primary" onclick="startGame()">Mulai Petualangan</button>
+    </div>
+
+    <!-- Screen 2: Game Area -->
+    <div class="glass-panel" id="screen-game">
+        <div class="mascot-container" style="transform: scale(0.7); right: 10px; top: -40px;">
+            <div class="mascot">
+                <div class="blush left"></div>
+                <div class="blush right"></div>
+                <div class="mouth"></div>
+            </div>
+        </div>
+        <div class="hud">
+            <div class="hud-info">
+                <b id="hud-name">Nama</b> | <span id="hud-class" style="display:inline;">Kelas</span>
+                <div id="hud-level" style="margin-top: 5px; color: var(--cyan); font-weight: bold;">Level 1/5: Pilihan Ganda</div>
+            </div>
+            <div class="hud-score" id="hud-score">0 / 100</div>
+        </div>
+        <div class="progress-bar-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+
+        <div id="level-description" style="margin-bottom: 1rem; color: var(--pink); font-weight: bold; font-size: 0.9rem;"></div>
+        
+        <div id="question-container">
+            <!-- Dynamic Content goes here -->
+        </div>
+
+        <div id="feedback" class="feedback-box">
+            <h4 id="feedback-title">Jawaban Benar!</h4>
+            <p id="feedback-text">Penjelasan disini.</p>
+        </div>
+
+        <button class="btn btn-primary" id="next-btn" style="display: none;" onclick="nextQuestion()">Selanjutnya</button>
+        <button class="btn btn-primary" id="submit-btn" style="display: none;" onclick="submitComplexAnswer()">Cek Jawaban</button>
+    </div>
+
+    <!-- Screen 3: Certificate -->
+    <div class="glass-panel" id="screen-cert">
+        <div class="certificate">
+            <h2 class="cert-title">Sertifikat Penghargaan</h2>
+            <p>Diberikan kepada pahlawan sejarah:</p>
+            <h1 id="cert-name" style="color: white; margin-top: 10px;">Nama Pemain</h1>
+            <p>Kelas: <span id="cert-class">XI</span></p>
+            
+            <p style="margin-top: 20px;">Telah menyelesaikan Misi Proklamasi dengan Skor:</p>
+            <div id="cert-score-display" style="font-size: 3rem; font-weight: bold;">100</div>
+            <div id="cert-grade" class="cert-grade grade-gold">AMAT BAIK</div>
+
+            <div class="cert-quote">
+                "Bangsa yang besar adalah bangsa yang menghormati jasa pahlawannya."<br>
+                <span style="font-size: 0.9rem;">- Ir. Soekarno</span>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-secondary" onclick="printCert()">Cetak Bukti</button>
+                <button class="btn btn-primary" onclick="location.reload()">Main Lagi</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- GAME DATA ---
+        const gameData = [
+            {
+                level: 1,
+                title: "Level 1: Kilas Balik (Pilihan Ganda)",
+                desc: "Pilih 1 jawaban yang paling tepat. (4 Soal x 5 Poin)",
+                type: "mcq",
+                questions: [
+                    {
+                        q: "Peristiwa Rengasdengklok terjadi karena adanya perbedaan pendapat antara golongan tua dan golongan muda mengenai...",
+                        options: ["Siapa yang menandatangani naskah", "Waktu pelaksanaan proklamasi", "Tempat pembacaan teks", "Bentuk negara Indonesia"],
+                        answer: 1,
+                        points: 5,
+                        explanation: "Golongan muda mendesak proklamasi disegerakan tanpa menunggu janji PPKI bentukan Jepang, sementara golongan tua ingin melalui sidang PPKI."
+                    },
+                    {
+                        q: "Tokoh Jepang yang bersimpati dan meminjamkan rumahnya sebagai tempat aman untuk merumuskan naskah proklamasi adalah...",
+                        options: ["Jenderal Terauchi", "Kaisar Hirohito", "Laksamana Maeda", "Mayor Jenderal Nishimura"],
+                        answer: 2,
+                        points: 5,
+                        explanation: "Laksamana Tadashi Maeda adalah Kepala Perwakilan Angkatan Laut Jepang di Jakarta yang bersimpati pada perjuangan Indonesia."
+                    },
+                    {
+                        q: "Tokoh yang berperan mengetik naskah proklamasi setelah ditulis tangan oleh Soekarno adalah...",
+                        options: ["Sayuti Melik", "B.M. Diah", "Sukarni", "Ahmad Soebardjo"],
+                        answer: 0,
+                        points: 5,
+                        explanation: "Sayuti Melik mengetik naskah tersebut dan melakukan beberapa perubahan ejaan demi penyempurnaan."
+                    },
+                    {
+                        q: "Dimanakah naskah Proklamasi Kemerdekaan Indonesia dibacakan pada tanggal 17 Agustus 1945?",
+                        options: ["Lapangan Ikada", "Rumah Laksamana Maeda", "Gedung Chuo Sangi-in", "Jl. Pegangsaan Timur No. 56"],
+                        answer: 3,
+                        points: 5,
+                        explanation: "Pembacaan dilakukan di kediaman Soekarno, Jalan Pegangsaan Timur No. 56 Jakarta (sekarang Gedung Perintis Kemerdekaan)."
+                    }
+                ]
+            },
+            {
+                level: 2,
+                title: "Level 2: Fakta atau Mitos (Benar / Salah)",
+                desc: "Tentukan apakah pernyataan berikut Benar atau Salah. (4 Soal x 5 Poin)",
+                type: "tf",
+                questions: [
+                    {
+                        q: "Kekalahan Jepang dalam Perang Dunia II dipicu oleh dijatuhkannya bom atom di kota Hiroshima dan Nagasaki oleh Sekutu.",
+                        options: ["Benar", "Salah"],
+                        answer: 0,
+                        points: 5,
+                        explanation: "Benar. Bom atom dijatuhkan pada 6 Agustus (Hiroshima) dan 9 Agustus (Nagasaki), memaksa Jepang menyerah pada 14 Agustus 1945."
+                    },
+                    {
+                        q: "Ir. Soekarno langsung setuju untuk memproklamasikan kemerdekaan pada tanggal 15 Agustus 1945 saat didesak pemuda.",
+                        options: ["Benar", "Salah"],
+                        answer: 1,
+                        points: 5,
+                        explanation: "Salah. Soekarno awalnya menolak karena ingin membicarakannya dulu dalam rapat PPKI untuk menghindari pertumpahan darah dengan Jepang."
+                    },
+                    {
+                        q: "Bendera Pusaka Sang Saka Merah Putih yang dikibarkan saat proklamasi dijahit oleh Ibu Fatmawati.",
+                        options: ["Benar", "Salah"],
+                        answer: 0,
+                        points: 5,
+                        explanation: "Benar. Fatmawati, istri Ir. Soekarno, menjahit bendera pusaka dari bahan katun Jepang yang diperoleh dari seorang perwira Jepang."
+                    },
+                    {
+                        q: "Makna proklamasi secara 'de jure' adalah pernyataan merdeka yang hanya diakui oleh rakyatnya sendiri.",
+                        options: ["Benar", "Salah"],
+                        answer: 1,
+                        points: 5,
+                        explanation: "Salah. Makna 'de jure' (hukum) adalah Indonesia berhak mendapat pengakuan dari negara lain secara hukum internasional. 'De facto' adalah pengakuan kenyataan adanya negara."
+                    }
+                ]
+            },
+            {
+                level: 3,
+                title: "Level 3: Analisis Aktor (Pilihan Majemuk)",
+                desc: "Pilih SEMUA jawaban yang benar (bisa lebih dari satu). Klik 'Cek Jawaban'. (2 Soal x 10 Poin)",
+                type: "multiselect",
+                questions: [
+                    {
+                        q: "Siapa sajakah tokoh yang termasuk dalam 'Golongan Muda' yang mendesak Proklamasi?",
+                        options: ["Sukarni", "Mohammad Hatta", "Wikana", "Chaerul Saleh", "Ahmad Soebardjo"],
+                        answer: [0, 2, 3],
+                        points: 10,
+                        explanation: "Sukarni, Wikana, dan Chaerul Saleh adalah motor penggerak golongan muda. Hatta dan Soebardjo adalah golongan tua."
+                    },
+                    {
+                        q: "Apa saja peran dan tindakan Laksamana Maeda terkait peristiwa Proklamasi?",
+                        options: [
+                            "Menyediakan rumahnya untuk merumuskan naskah", 
+                            "Ikut menyusun kalimat pertama teks proklamasi", 
+                            "Menjamin keselamatan Soekarno-Hatta selama di rumahnya",
+                            "Membaca teks proklamasi menggantikan Soekarno"
+                        ],
+                        answer: [0, 2],
+                        points: 10,
+                        explanation: "Maeda memfasilitasi dan menjamin keamanan (0, 2). Ia tidak ikut menyusun teks apalagi membacanya, karena ia mundur ke kamar tidur saat perumusan."
+                    }
+                ]
+            },
+            {
+                level: 4,
+                title: "Level 4: Merangkai Sejarah (Menjodohkan)",
+                desc: "Klik tokoh di kolom kiri, lalu klik perannya di kolom kanan! (5 Pasang x 4 Poin)",
+                type: "matching",
+                points: 20,
+                pairs: [
+                    { id: 1, left: "Sukarni", right: "Mengusulkan teks ditandatangani Soekarno-Hatta atas nama bangsa" },
+                    { id: 2, left: "Ahmad Soebardjo", right: "Menjemput & memberi jaminan nyawa di Rengasdengklok" },
+                    { id: 3, left: "B.M. Diah", right: "Menyelamatkan & menyimpan naskah asli tulisan tangan" },
+                    { id: 4, left: "Syudanco Singgih", right: "Mengamankan Soekarno-Hatta ke Rengasdengklok" },
+                    { id: 5, left: "Sayuti Melik", right: "Mengetik naskah proklamasi kemerdekaan" }
+                ]
+            },
+            {
+                level: 5,
+                title: "Level 5: Evaluasi Historis (HOTS)",
+                desc: "Pilih analisis yang paling kritis dan tepat. (2 Soal x 10 Poin)",
+                type: "mcq",
+                questions: [
+                    {
+                        q: "[Analisis] Apa esensi utama tindakan 'penculikan' Soekarno-Hatta ke Rengasdengklok oleh golongan muda?",
+                        options: [
+                            "Menghukum Soekarno karena bekerja sama dengan Jepang.",
+                            "Mendeklarasikan kemerdekaan di Rengasdengklok agar terhindar dari sekutu.",
+                            "Menjauhkan Soekarno-Hatta dari pengaruh Jepang dan mendesak proklamasi mandiri.",
+                            "Menunggu kedatangan tentara Sekutu tiba di Indonesia."
+                        ],
+                        answer: 2,
+                        points: 10,
+                        explanation: "Golongan muda tidak ingin kemerdekaan dianggap sebagai 'hadiah' dari Jepang (melalui PPKI), karenanya mereka mengisolasi Dwi Tunggal agar segera memproklamasikan atas nama bangsa sendiri."
+                    },
+                    {
+                        q: "[Hipotetis] Secara historis, apa kemungkinan terburuk jika Laksamana Maeda tidak meminjamkan rumahnya malam itu?",
+                        options: [
+                            "Kemerdekaan akan dibatalkan selamanya.",
+                            "Perumusan naskah terancam dibubarkan/diserang oleh patroli tentara Angkatan Darat Jepang (Gunseikanbu).",
+                            "Soekarno akan menyerahkan diri kepada tentara Sekutu.",
+                            "Belanda langsung menginvasi Jakarta malam itu juga."
+                        ],
+                        answer: 1,
+                        points: 10,
+                        explanation: "Status Quo dipertahankan militer Jepang atas perintah Sekutu. Angkatan Darat (Rikugun) dilarang mengubah keadaan politik. Rumah Maeda (Angkatan Laut/Kaigun) memiliki hak imunitas ekstrateritorial yang mencegah patroli AD Jepang masuk sembarangan."
+                    }
+                ]
+            }
+        ];
+
+        // --- STATE MANAGEMENT ---
+        let state = {
+            name: "",
+            playerClass: "",
+            score: 0,
+            currentLevelIndex: 0,
+            currentQuestionIndex: 0,
+            totalQuestionsOverall: 13, // 4+4+2+1(match)+2
+            questionsAnsweredOverall: 0,
+            matchingState: {
+                leftSelected: null,
+                rightSelected: null,
+                matches: 0,
+                pairs: []
+            }
+        };
+
+        // --- DOM ELEMENTS ---
+        const screens = {
+            login: document.getElementById('screen-login'),
+            game: document.getElementById('screen-game'),
+            cert: document.getElementById('screen-cert')
+        };
+        const hud = {
+            name: document.getElementById('hud-name'),
+            pClass: document.getElementById('hud-class'),
+            level: document.getElementById('hud-level'),
+            score: document.getElementById('hud-score'),
+            progress: document.getElementById('progress-bar')
+        };
+        const qContainer = document.getElementById('question-container');
+        const feedbackBox = document.getElementById('feedback');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const feedbackText = document.getElementById('feedback-text');
+        const nextBtn = document.getElementById('next-btn');
+        const submitBtn = document.getElementById('submit-btn');
+        const levelDesc = document.getElementById('level-description');
+
+        // --- CORE FUNCTIONS ---
+        function startGame() {
+            const nameInput = document.getElementById('playerName').value.trim();
+            const classInput = document.getElementById('playerClass').value.trim();
+            const err = document.getElementById('errorMsg');
+
+            if (!nameInput || !classInput) {
+                err.style.display = 'block';
+                return;
+            }
+            err.style.display = 'none';
+            state.name = nameInput;
+            state.playerClass = classInput;
+            
+            hud.name.textContent = state.name;
+            hud.pClass.textContent = state.playerClass;
+
+            switchScreen('game');
+            loadLevel();
+        }
+
+        function switchScreen(screenName) {
+            Object.values(screens).forEach(s => s.classList.remove('active'));
+            screens[screenName].classList.add('active');
+        }
+
+        function updateProgress() {
+            hud.score.textContent = `${state.score} / 100`;
+            const percentage = (state.questionsAnsweredOverall / state.totalQuestionsOverall) * 100;
+            hud.progress.style.width = `${percentage}%`;
+        }
+
+        function loadLevel() {
+            if (state.currentLevelIndex >= gameData.length) {
+                showCertificate();
+                return;
+            }
+
+            const levelData = gameData[state.currentLevelIndex];
+            hud.level.textContent = levelData.title;
+            levelDesc.textContent = levelData.desc;
+            state.currentQuestionIndex = 0;
+
+            hideFeedback();
+            nextBtn.style.display = 'none';
+            submitBtn.style.display = 'none';
+
+            if (levelData.type === 'matching') {
+                renderMatching(levelData);
+            } else {
+                renderQuestion();
+            }
+        }
+
+        function renderQuestion() {
+            const levelData = gameData[state.currentLevelIndex];
+            const qData = levelData.questions[state.currentQuestionIndex];
+            
+            qContainer.innerHTML = `
+                <div class="question-box"><b>Pertanyaan ${state.currentQuestionIndex + 1}/${levelData.questions.length}:</b><br>${qData.q}</div>
+                <div class="options-grid" id="options-container"></div>
+            `;
+            
+            const optContainer = document.getElementById('options-container');
+
+            if (levelData.type === 'mcq' || levelData.type === 'tf') {
+                qData.options.forEach((opt, index) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'option-btn';
+                    btn.innerHTML = `${String.fromCharCode(65+index)}. ${opt}`;
+                    btn.onclick = () => handleMCQAnswer(index, btn);
+                    optContainer.appendChild(btn);
+                });
+            } else if (levelData.type === 'multiselect') {
+                qData.options.forEach((opt, index) => {
+                    const label = document.createElement('label');
+                    label.className = 'checkbox-container';
+                    label.innerHTML = `<input type="checkbox" value="${index}"> <span>${opt}</span>`;
+                    optContainer.appendChild(label);
+                });
+                submitBtn.style.display = 'block';
+                submitBtn.onclick = () => handleMultiSelectAnswer();
+            }
+        }
+
+        // --- ANSWER HANDLERS ---
+        function handleMCQAnswer(selectedIndex, btnElement) {
+            const levelData = gameData[state.currentLevelIndex];
+            const qData = levelData.questions[state.currentQuestionIndex];
+            const isCorrect = selectedIndex === qData.answer;
+
+            // Disable all buttons
+            const buttons = document.querySelectorAll('.option-btn');
+            buttons.forEach(b => b.disabled = true);
+
+            if (isCorrect) {
+                btnElement.classList.add('correct');
+                state.score += qData.points;
+                showFeedback(true, qData.explanation);
+            } else {
+                btnElement.classList.add('wrong');
+                buttons[qData.answer].classList.add('correct');
+                showFeedback(false, `Jawaban salah. <br>${qData.explanation}`);
+            }
+
+            state.questionsAnsweredOverall++;
+            updateProgress();
+            nextBtn.style.display = 'block';
+        }
+
+        function handleMultiSelectAnswer() {
+            const levelData = gameData[state.currentLevelIndex];
+            const qData = levelData.questions[state.currentQuestionIndex];
+            
+            const checkboxes = document.querySelectorAll('.checkbox-container input');
+            let selected = [];
+            checkboxes.forEach(cb => {
+                if (cb.checked) selected.push(parseInt(cb.value));
+                cb.disabled = true; // disable after submit
+            });
+
+            // Compare arrays exactly
+            const isCorrect = JSON.stringify(selected.sort()) === JSON.stringify(qData.answer.sort());
+
+            submitBtn.style.display = 'none';
+
+            if (isCorrect) {
+                state.score += qData.points;
+                showFeedback(true, qData.explanation);
+                // Style correct checkboxes
+                checkboxes.forEach(cb => {
+                    if (cb.checked) cb.parentElement.style.border = "1px solid var(--green)";
+                });
+            } else {
+                showFeedback(false, `Jawaban kurang tepat. Harus memilih kombinasi yang akurat.<br>${qData.explanation}`);
+                // Style wrong/correct
+                checkboxes.forEach(cb => {
+                    if (qData.answer.includes(parseInt(cb.value))) {
+                        cb.parentElement.style.border = "1px solid var(--green)";
+                    } else if (cb.checked) {
+                        cb.parentElement.style.border = "1px solid var(--pink)";
+                    }
+                });
+            }
+
+            state.questionsAnsweredOverall++;
+            updateProgress();
+            nextBtn.style.display = 'block';
+        }
+
+        // --- MATCHING GAME LOGIC (LEVEL 4) ---
+        function renderMatching(levelData) {
+            // Shuffle left and right independently
+            const leftItems = [...levelData.pairs].sort(() => Math.random() - 0.5);
+            const rightItems = [...levelData.pairs].sort(() => Math.random() - 0.5);
+            
+            state.matchingState = { leftSelected: null, rightSelected: null, matches: 0, total: levelData.pairs.length, pointsPerMatch: levelData.points / levelData.pairs.length };
+
+            let html = `<div class="match-container">
+                <div class="match-column" id="match-left">`;
+            leftItems.forEach(item => {
+                html += `<div class="match-item left-item" data-id="${item.id}">${item.left}</div>`;
+            });
+            html += `</div><div class="match-column" id="match-right">`;
+            rightItems.forEach(item => {
+                html += `<div class="match-item right-item" data-id="${item.id}">${item.right}</div>`;
+            });
+            html += `</div></div>`;
+            
+            qContainer.innerHTML = html;
+
+            document.querySelectorAll('.left-item').forEach(el => {
+                el.onclick = () => handleMatchClick(el, 'left');
+            });
+            document.querySelectorAll('.right-item').forEach(el => {
+                el.onclick = () => handleMatchClick(el, 'right');
+            });
+        }
+
+        function handleMatchClick(el, side) {
+            if (el.classList.contains('matched')) return;
+
+            // Handle Selection Visuals
+            document.querySelectorAll(`.${side}-item`).forEach(i => i.classList.remove('selected'));
+            el.classList.add('selected');
+
+            if (side === 'left') state.matchingState.leftSelected = el;
+            if (side === 'right') state.matchingState.rightSelected = el;
+
+            // Check Match if both selected
+            if (state.matchingState.leftSelected && state.matchingState.rightSelected) {
+                const lId = state.matchingState.leftSelected.getAttribute('data-id');
+                const rId = state.matchingState.rightSelected.getAttribute('data-id');
+
+                if (lId === rId) {
+                    // Match Success
+                    state.matchingState.leftSelected.classList.remove('selected');
+                    state.matchingState.rightSelected.classList.remove('selected');
+                    state.matchingState.leftSelected.classList.add('matched');
+                    state.matchingState.rightSelected.classList.add('matched');
+                    
+                    state.score += state.matchingState.pointsPerMatch;
+                    state.matchingState.matches++;
+                    
+                    if (state.matchingState.matches === state.matchingState.total) {
+                        state.questionsAnsweredOverall++; // Treat matching as 1 big question for progress
+                        updateProgress();
+                        showFeedback(true, "Luar biasa! Kamu berhasil merangkai semua fakta sejarah dengan benar.");
+                        nextBtn.style.display = 'block';
+                        triggerConfetti(50);
+                    } else {
+                        // small feedback
+                        updateProgress();
+                    }
+                } else {
+                    // Match Fail
+                    const lTemp = state.matchingState.leftSelected;
+                    const rTemp = state.matchingState.rightSelected;
+                    lTemp.classList.add('error-shake');
+                    rTemp.classList.add('error-shake');
+                    setTimeout(() => {
+                        lTemp.classList.remove('error-shake', 'selected');
+                        rTemp.classList.remove('error-shake', 'selected');
+                    }, 400);
+                }
+                // Reset selections
+                state.matchingState.leftSelected = null;
+                state.matchingState.rightSelected = null;
+            }
+        }
+
+        // --- UTILS & FLOW ---
+        function showFeedback(isCorrect, text) {
+            feedbackBox.className = 'feedback-box show ' + (isCorrect ? 'feedback-correct' : 'feedback-wrong');
+            feedbackTitle.textContent = isCorrect ? '✅ Tepat Sekali!' : '❌ Kurang Tepat';
+            feedbackText.innerHTML = text;
+        }
+
+        function hideFeedback() {
+            feedbackBox.className = 'feedback-box';
+        }
+
+        function nextQuestion() {
+            hideFeedback();
+            nextBtn.style.display = 'none';
+            const levelData = gameData[state.currentLevelIndex];
+
+            if (levelData.type === 'matching') {
+                // Matching only has 1 "screen"
+                state.currentLevelIndex++;
+                triggerConfetti(100);
+                loadLevel();
+            } else {
+                state.currentQuestionIndex++;
+                if (state.currentQuestionIndex < levelData.questions.length) {
+                    renderQuestion();
+                } else {
+                    // Level Up
+                    state.currentLevelIndex++;
+                    triggerConfetti(100);
+                    loadLevel();
+                }
+            }
+        }
+
+        function showCertificate() {
+            switchScreen('cert');
+            triggerConfetti(300); // Big Confetti
+            
+            document.getElementById('cert-name').textContent = state.name;
+            document.getElementById('cert-class').textContent = state.playerClass;
+            document.getElementById('cert-score-display').textContent = state.score;
+            
+            const gradeEl = document.getElementById('cert-grade');
+            gradeEl.className = 'cert-grade'; // reset
+            
+            if (state.score >= 90) {
+                gradeEl.textContent = 'AMAT BAIK';
+                gradeEl.classList.add('grade-gold');
+            } else if (state.score >= 75) {
+                gradeEl.textContent = 'BAIK';
+                gradeEl.classList.add('grade-cyan');
+            } else {
+                gradeEl.textContent = 'CUKUP';
+                gradeEl.classList.add('grade-yellow');
+            }
+        }
+
+        function printCert() {
+            window.print();
+        }
+
+        // --- CONFETTI ANIMATION ---
+        const canvas = document.getElementById('confetti');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let particles = [];
+        const colors = ['#6C5CE7', '#00D2FF', '#FF6B9D', '#FFD93D', '#6BCB77', '#ffffff'];
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        function triggerConfetti(amount = 100) {
+            for (let i = 0; i < amount; i++) {
+                particles.push({
+                    x: canvas.width / 2,
+                    y: canvas.height / 2 + 100,
+                    r: Math.random() * 6 + 4,
+                    dx: Math.random() * 10 - 5,
+                    dy: Math.random() * -15 - 5,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    tilt: Math.floor(Math.random() * 10) - 10,
+                    tiltAngleInc: (Math.random() * 0.07) + 0.05,
+                    tiltAngle: 0
+                });
+            }
+            if(particles.length <= amount) animateConfetti(); // start loop if not running
+        }
+
+        function animateConfetti() {
+            requestAnimationFrame(animateConfetti);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            particles.forEach((p, index) => {
+                p.tiltAngle += p.tiltAngleInc;
+                p.y += (Math.cos(p.tiltAngle) + 1 + p.r / 2) / 2;
+                p.x += Math.sin(p.tiltAngle) * 2;
+                p.dy += 0.1; // gravity
+                p.y += p.dy;
+                p.x += p.dx;
+
+                ctx.beginPath();
+                ctx.lineWidth = p.r;
+                ctx.strokeStyle = p.color;
+                ctx.moveTo(p.x + p.tilt + p.r, p.y);
+                ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r);
+                ctx.stroke();
+
+                if (p.y > canvas.height) particles.splice(index, 1);
+            });
+        }
+    </script>
+</body>
+</html>
